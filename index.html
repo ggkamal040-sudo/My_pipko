@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuBin NFT — Панель управления</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+  :root {
+    --ruby: #9b111e;
+    --ruby-light: #c41e3a;
+    --ruby-dark: #6b0f1a;
+    --ruby-glow: rgba(196, 30, 58, 0.45);
+    --card-bg: #1a0a0f;
+    --border: rgba(196, 30, 58, 0.3);
+    --text: #f5e6e8;
+    --text-dim: #b89a9e;
+    --blue: #2563eb;
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #1a0a0f 0%, #0d0608 60%, #000 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 30px 20px;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  .logo { text-align: center; margin-bottom: 40px; }
+  .logo h1 {
+    font-size: 3.5rem; font-weight: 900; letter-spacing: 3px;
+    background: linear-gradient(135deg, #ff4d6d 0%, var(--ruby-light) 40%, var(--ruby) 70%, var(--ruby-dark) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 60px var(--ruby-glow);
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+  .logo h1 span {
+    font-size: 1.2rem; display: block; letter-spacing: 8px;
+    color: var(--text-dim); font-weight: 400;
+    -webkit-text-fill-color: var(--text-dim); margin-top: 5px;
+  }
+  .logo::after {
+    content: ''; display: block; width: 120px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ruby-light), transparent);
+    margin: 20px auto 0;
+  }
+  @keyframes glow {
+    from { text-shadow: 0 0 40px var(--ruby-glow); }
+    to   { text-shadow: 0 0 80px var(--ruby-light), 0 0 120px var(--ruby-glow); }
+  }
+
+  .card {
+    background: linear-gradient(145deg, var(--card-bg), #120509);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 30px; margin-bottom: 25px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ruby-light), transparent);
+    opacity: 0.6;
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-size: 0.8rem; color: var(--text-dim);
+    margin-bottom: 6px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .field input {
+    width: 100%; padding: 14px 16px; font-size: 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); outline: none;
+    transition: all 0.25s; font-family: inherit;
+  }
+  .field input:focus {
+    border-color: var(--ruby-light);
+    box-shadow: 0 0 20px var(--ruby-glow);
+    background: rgba(255,255,255,0.06);
+  }
+  .field input::placeholder { color: var(--text-dim); }
+
+  .connect-btn {
+    width: 100%; padding: 18px; font-size: 1.1rem; font-weight: 700; color: white;
+    background: linear-gradient(135deg, var(--ruby-light), var(--ruby), var(--ruby-dark));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px; cursor: pointer; letter-spacing: 1px;
+    transition: all 0.3s; box-shadow: 0 5px 25px var(--ruby-glow);
+    text-transform: uppercase; margin-top: 10px;
+  }
+  .connect-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px var(--ruby-glow), 0 0 30px var(--ruby-light);
+  }
+  .connect-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .account-info {
+    display: flex; align-items: center; gap: 15px;
+    padding: 15px 20px;
+    background: rgba(196,30,58,0.08);
+    border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 20px;
+  }
+  .account-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ruby-light), var(--ruby-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.3rem;
+    box-shadow: 0 0 20px var(--ruby-glow);
+  }
+  .account-name { font-weight: 600; font-size: 1.05rem; }
+  .account-sub  { color: var(--text-dim); font-size: 0.85rem; margin-top: 3px; }
+
+  .section-title {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::before {
+    content: ''; width: 4px; height: 20px;
+    background: var(--ruby-light); border-radius: 2px;
+    box-shadow: 0 0 10px var(--ruby-light);
+  }
+</style>
+</head>
+<style>
+  .nft-list {
+    display: flex; flex-direction: column; gap: 12px;
+    max-height: 420px; overflow-y: auto; padding-right: 5px;
+  }
+  .nft-list::-webkit-scrollbar { width: 6px; }
+  .nft-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 3px; }
+  .nft-list::-webkit-scrollbar-thumb { background: var(--ruby); border-radius: 3px; }
+
+  .nft-item {
+    display: flex; align-items: center; gap: 15px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(196,30,58,0.15);
+    border-radius: 14px; transition: all 0.25s;
+  }
+  .nft-item:hover {
+    background: rgba(196,30,58,0.06);
+    border-color: var(--ruby-light);
+    transform: translateX(4px);
+  }
+  .nft-item.locked { opacity: 0.55; }
+  .nft-item.locked:hover { transform: none; border-color: rgba(196,30,58,0.15); }
+
+  .nft-thumb {
+    width: 55px; height: 55px; border-radius: 12px;
+    background: linear-gradient(135deg, #2a1018, #1a0a0f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; flex-shrink: 0;
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .nft-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .nft-info { flex: 1; min-width: 0; }
+  .nft-name { font-weight: 600; font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nft-collection { color: var(--text-dim); font-size: 0.8rem; margin-top: 3px; }
+
+  .nft-badge {
+    display: inline-block; margin-left: 6px;
+    font-size: 0.65rem; padding: 2px 7px;
+    border-radius: 6px; font-weight: 700;
+    vertical-align: middle;
+  }
+  .badge-locked { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+  .badge-star   { background: rgba(255,215,0,0.15); color: #ffd700; }
+
+  .check-circle {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid var(--ruby-light);
+    cursor: pointer; flex-shrink: 0;
+    transition: all 0.25s; position: relative; background: transparent;
+  }
+  .check-circle:hover { transform: scale(1.15); box-shadow: 0 0 15px var(--ruby-glow); }
+  .check-circle.selected {
+    background: var(--blue); border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(37,99,235,0.6);
+  }
+  .check-circle.selected::after {
+    content: '✓'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 0.85rem; font-weight: 900;
+  }
+  .check-circle.locked {
+    border-color: rgba(255,255,255,0.15);
+    cursor: not-allowed; background: rgba(255,255,255,0.03);
+  }
+  .check-circle.locked:hover { transform: none; box-shadow: none; }
+  .check-circle.locked::after {
+    content: '🔒'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; filter: grayscale(1);
+  }
+
+  .balance-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 15px; margin-top: 20px; padding-top: 20px;
+    border-top: 1px solid rgba(196,30,58,0.2); flex-wrap: wrap;
+  }
+  .balance-info { display: flex; align-items: center; gap: 12px; }
+  .star-icon {
+    font-size: 2rem; filter: drop-shadow(0 0 10px gold);
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50%      { transform: scale(1.1) rotate(10deg); }
+  }
+  .balance-amount { font-size: 1.6rem; font-weight: 800; color: #ffd700; }
+  .balance-label  { color: var(--text-dim); font-size: 0.8rem; }
+
+  .withdraw-btn {
+    padding: 14px 32px; font-size: 1rem; font-weight: 700; color: white;
+    background: linear-gradient(135deg, var(--ruby-light), var(--ruby));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; cursor: pointer; transition: all 0.3s;
+    box-shadow: 0 5px 20px var(--ruby-glow);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .withdraw-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px var(--ruby-glow), 0 0 25px var(--ruby-light);
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; opacity: 0; visibility: hidden;
+    transition: all 0.3s; padding: 20px;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+  .modal {
+    background: linear-gradient(145deg, #1a0a0f, #0d0608);
+    border: 1px solid var(--ruby-light);
+    border-radius: 24px; padding: 40px 35px;
+    max-width: 450px; width: 100%;
+    box-shadow: 0 20px 80px rgba(155,17,30,0.5), 0 0 100px var(--ruby-glow);
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative; overflow: hidden;
+  }
+  .modal::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--ruby-dark), var(--ruby-light), var(--ruby-dark));
+  }
+  .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+  .modal-title {
+    font-size: 1.5rem; font-weight: 800; text-align: center; margin-bottom: 8px;
+    background: linear-gradient(135deg, #ff4d6d, var(--ruby-light));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .modal-sub { text-align: center; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 28px; }
+  .selected-summary {
+    background: rgba(37,99,235,0.1);
+    border: 1px solid rgba(37,99,235,0.3);
+    border-radius: 12px; padding: 14px 18px;
+    margin-bottom: 22px; font-size: 0.9rem; color: #93c5fd;
+  }
+  .selected-summary strong { color: #bfdbfe; }
+  .modal input {
+    width: 100%; padding: 16px 18px; font-size: 1rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); outline: none;
+    transition: all 0.25s; margin-bottom: 20px;
+  }
+  .modal input:focus {
+    border-color: var(--ruby-light);
+    box-shadow: 0 0 20px var(--ruby-glow);
+    background: rgba(255,255,255,0.06);
+  }
+  .modal input::placeholder { color: var(--text-dim); }
+  .modal-actions { display: flex; gap: 12px; }
+  .btn-cancel, .btn-ok {
+    flex: 1; padding: 15px; font-size: 1rem; font-weight: 700;
+    border-radius: 12px; cursor: pointer;
+    transition: all 0.25s; border: none;
+  }
+  .btn-cancel {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim); border: 1px solid var(--border);
+  }
+  .btn-cancel:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  .btn-ok {
+    background: linear-gradient(135deg, var(--ruby-light), var(--ruby));
+    color: white; box-shadow: 0 5px 20px var(--ruby-glow);
+  }
+  .btn-ok:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--ruby-glow); }
+  .btn-ok:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .toast {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, var(--ruby-light), var(--ruby));
+    color: white; padding: 16px 32px;
+    border-radius: 14px; font-weight: 600;
+    box-shadow: 0 10px 40px var(--ruby-glow);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 2000; border: 1px solid rgba(255,255,255,0.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .logo h1 { font-size: 2.2rem; }
+    .logo h1 span { font-size: 0.8rem; letter-spacing: 4px; }
+    .card { padding: 20px; }
+    .balance-row { flex-direction: column; align-items: stretch; }
+    .withdraw-btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <h1>RuBin NFT<span>MANAGEMENT PANEL</span></h1>
+  </div>
+
+  <!-- ПОДКЛЮЧЕНИЕ ТОЛЬКО ПО USER ID -->
+  <div class="card" id="connectCard">
+    <div class="section-title">Подключение по User ID</div>
+    <div class="field">
+      <label>User ID</label>
+      <input type="text" id="inpUserId" placeholder="Например: 123456789" autocomplete="off">
+    </div>
+    <button class="connect-btn" id="connectBtn" onclick="connectAccount()">
+      🔗 Подключить
+    </button>
+  </div>
+
+  <!-- ОСНОВНАЯ ПАНЕЛЬ -->
+  <div id="mainPanel" class="hidden">
+    <div class="card">
+      <div class="account-info">
+        <div class="account-avatar" id="avatar">R</div>
+        <div>
+          <div class="account-name" id="accName">—</div>
+          <div class="account-sub" id="accSub">Подключено</div>
+        </div>
+      </div>
+
+      <div class="section-title">Подарки в профиле</div>
+      <div class="nft-list" id="nftList"></div>
+
+      <div class="balance-row">
+        <div class="balance-info">
+          <div class="star-icon">⭐</div>
+          <div>
+            <div class="balance-amount" id="starsBalance">0</div>
+            <div class="balance-label">баланс звёзд</div>
+          </div>
+        </div>
+        <button class="withdraw-btn" onclick="openWithdrawModal()">Вывод →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА ВЫВОДА -->
+<div class="modal-overlay" id="withdrawModal">
+  <div class="modal">
+    <div class="modal-title">Вывод NFT</div>
+    <div class="modal-sub">Укажите получателя для передачи выбранных NFT</div>
+    <div class="selected-summary" id="selectedSummary">Выбрано NFT: <strong>0</strong></div>
+    <input type="text" id="usernameInput" placeholder="@username получателя" autocomplete="off">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeWithdrawModal()">Отмена</button>
+      <button class="btn-ok" id="okBtn" onclick="confirmWithdraw()">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ============================================================
+   RuBin NFT — фронтенд
+   Подключение ТОЛЬКО по user_id (без tdata).
+   Показываем ВСЕ подарки (включая за звёзды).
+   Невыводимые типы (кольцо, сердце, мишка и т.п.) — locked.
+   ============================================================ */
+
+const API = {
+  connect:  'https://твой-сервис.onrender.com/api/connect-userid',
+  withdraw: 'https://твой-сервис.onrender.com/api/withdraw-nft'
+};
+
+/* Типы подарков, которые НЕЛЬЗЯ выводить.
+   Сервер может прислать поле type — сверим с этим списком.
+   Или прислать withdrawable:false — тогда верим серверу. */
+const NON_WITHDRAWABLE = new Set([
+  'ring', 'heart', 'bear', 'teddy', 'rose', 'cake',
+  'bouquet', 'cup', 'diamond', 'crown', 'star',
+  'rocket', 'bear_cub', 'heart_gift'
+]);
+
+/* ---------- Состояние ---------- */
+let nfts = [];
+let selectedNFTs = new Set();
+let starsBalance = 0;
+let accountInfo = { name: '', letter: 'R' };
+let userId = null;   // только user_id, без tdata и sessionId
+
+/* ============================================================
+   1) ПОДКЛЮЧЕНИЕ ПО USER ID
+   ============================================================ */
+async function connectAccount() {
+  const raw = document.getElementById('inpUserId').value.trim();
+
+  if (!raw)               return showToast('⚠️ Введите User ID');
+  if (!/^\d+$/.test(raw)) return showToast('⚠️ User ID должен быть числом');
+
+  const btn = document.getElementById('connectBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Подключение...';
+
+  try {
+    userId = Number(raw);
+
+    const res = await fetch(API.connect, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Сервер вернул ' + res.status);
+    }
+
+    const data = await res.json();
+    // Ожидаемый ответ сервера:
+    // {
+    //   account: { name: "@user", letter: "U" },
+    //   nfts: [
+    //     { id, name, collection, emoji?, thumb?, type, paidWithStars?, withdrawable? },
+    //     ...
+    //   ],
+    //   stars: 1250
+    // }
+
+    accountInfo  = data.account || { name: '@user', letter: 'U' };
+    nfts         = data.nfts || [];
+    starsBalance = data.stars || 0;
+
+    document.getElementById('connectCard').classList.add('hidden');
+    document.getElementById('mainPanel').classList.remove('hidden');
+    document.getElementById('accName').textContent = accountInfo.name;
+    document.getElementById('accSub').textContent =
+      'ID ' + userId + ' • ' + nfts.length + ' подарков';
+    document.getElementById('avatar').textContent = accountInfo.letter || 'R';
+    document.getElementById('starsBalance').textContent =
+      starsBalance.toLocaleString('ru-RU');
+
+    renderNFTs();
+    showToast('✅ Аккаунт успешно подключён');
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Ошибка: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '🔗 Подключить';
+  }
+}
+
+/* ============================================================
+   2) ПРОВЕРКА: можно ли вывести этот подарок
+   ============================================================ */
+function isWithdrawable(gift) {
+  if (typeof gift.withdrawable === 'boolean') return gift.withdrawable;
+  const t = String(gift.type || '').toLowerCase();
+  return !NON_WITHDRAWABLE.has(t);
+}
+
+/* ============================================================
+   3) РЕНДЕР СПИСКА ПОДАРКОВ
+   Все подарки видны. Невыводимые — с замком.
+   ============================================================ */
+function renderNFTs() {
+  const list = document.getElementById('nftList');
+  list.innerHTML = '';
+
+  if (!nfts.length) {
+    list.innerHTML = '<div style="text-align:center;color:#b89a9e;padding:20px;">Подарков не найдено</div>';
+    return;
+  }
+
+  nfts.forEach(nft => {
+    const canWithdraw = isWithdrawable(nft);
+    const item = document.createElement('div');
+    item.className = 'nft-item' + (canWithdraw ? '' : ' locked');
+
+    const thumbHtml = nft.thumb
+      ? `<img src="${escapeAttr(nft.thumb)}" alt="">`
+      : (nft.emoji || '🎁');
+
+    let badges = '';
+    if (nft.paidWithStars) badges += '<span class="nft-badge badge-star">⭐ за звёзды</span>';
+    if (!canWithdraw)      badges += '<span class="nft-badge badge-locked">не выводится</span>';
+
+    item.innerHTML = `
+      <div class="nft-thumb">${thumbHtml}</div>
+      <div class="nft-info">
+        <div class="nft-name">${escapeHtml(nft.name)}${badges}</div>
+        <div class="nft-collection">${escapeHtml(nft.collection || '')}</div>
+      </div>
+      <div class="check-circle ${canWithdraw ? '' : 'locked'} ${selectedNFTs.has(nft.id) ? 'selected' : ''}"
+           data-id="${nft.id}"
+           onclick="${canWithdraw ? `toggleSelect(${nft.id})` : ''}"></div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+/* ============================================================
+   4) ВЫБОР NFT
+   ============================================================ */
+function toggleSelect(id) {
+  const nft = nfts.find(n => n.id === id);
+  if (!nft || !isWithdrawable(nft)) return;
+
+  const circle = document.querySelector(`.check-circle[data-id="${id}"]`);
+  if (!circle) return;
+
+  if (selectedNFTs.has(id)) {
+    selectedNFTs.delete(id);
+    circle.classList.remove('selected');
+  } else {
+    selectedNFTs.add(id);
+    circle.classList.add('selected');
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const el = document.getElementById('selectedSummary');
+  if (el) el.innerHTML = `Выбрано NFT: <strong>${selectedNFTs.size}</strong>`;
+}
+
+/* ============================================================
+   5) МОДАЛКА ВЫВОДА
+   ============================================================ */
+function openWithdrawModal() {
+  if (selectedNFTs.size === 0) {
+    showToast('⚠️ Выберите хотя бы один NFT');
+    return;
+  }
+  updateSummary();
+  document.getElementById('usernameInput').value = '';
+  document.getElementById('withdrawModal').classList.add('active');
+  setTimeout(() => document.getElementById('usernameInput').focus(), 300);
+}
+
+function closeWithdrawModal() {
+  document.getElementById('withdrawModal').classList.remove('active');
+}
+
+/* ============================================================
+   6) ПОДТВЕРЖДЕНИЕ ВЫВОДА
+   Отправляем user_id, а не sessionId.
+   ============================================================ */
+async function confirmWithdraw() {
+  const username = document.getElementById('usernameInput').value.trim();
+
+  if (!username)                 return showToast('⚠️ Введите username');
+  if (!username.startsWith('@')) return showToast('⚠️ Username должен начинаться с @');
+  if (username.length < 3)       return showToast('⚠️ Слишком короткий username');
+  if (!userId)                   return showToast('❌ Аккаунт не подключён');
+
+  const ids = Array.from(selectedNFTs);
+  const okBtn = document.getElementById('okBtn');
+  okBtn.disabled = true;
+  okBtn.textContent = '⏳...';
+
+  try {
+    const res = await fetch(API.withdraw, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, username, nftIds: ids })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Сервер вернул ' + res.status);
+    }
+
+    const data = await res.json();
+
+    closeWithdrawModal();
+    showToast(`🎉 ${data.transferred ?? ids.length} NFT выведено на ${username}`);
+
+    nfts = nfts.filter(n => !selectedNFTs.has(n.id));
+    selectedNFTs.clear();
+    document.getElementById('accSub').textContent =
+      'ID ' + userId + ' • ' + nfts.length + ' подарков';
+    renderNFTs();
+    updateSummary();
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Ошибка вывода: ' + err.message);
+  } finally {
+    okBtn.disabled = false;
+    okBtn.textContent = 'OK';
+  }
+}
+
+/* ============================================================
+   7) УТИЛИТЫ
+   ============================================================ */
+let toastTimer;
+function showToast(text) {
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
+function escapeAttr(str) {
+  return String(str).replace(/"/g, '&quot;');
+}
+
+document.getElementById('withdrawModal').addEventListener('click', e => {
+  if (e.target.id === 'withdrawModal') closeWithdrawModal();
+});
+document.getElementById('usernameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmWithdraw();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeWithdrawModal();
+});
+</script>
+
+</body>
+</html>
